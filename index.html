@@ -66,11 +66,11 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-tight">Tabungan Nikah Kita</h1>
-                    <p class="text-xs text-rose-100" id="syncStatus">Memuat data cloud...</p>
+                    <p class="text-xs text-emerald-200 font-medium" id="syncStatus">Tersambung & Aktif</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
-                <button onclick="toggleDeployModal()" class="p-2 rounded-full bg-white/20 hover:bg-white/30 transition text-white" title="Panduan GitHub / Hosting Permanen">
+                <button onclick="toggleDeployModal()" class="p-2 rounded-full bg-white/20 hover:bg-white/30 transition text-white" title="Panduan GitHub">
                     <i class="fa-brands fa-github text-lg"></i>
                 </button>
                 <button id="reminderBtn" onclick="toggleReminderModal()" class="p-2 rounded-full bg-white/20 hover:bg-white/30 transition text-white relative" title="Pengingat Jam 7 Malam">
@@ -215,9 +215,9 @@
 
             <!-- History Container -->
             <div id="historyList" class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
-                <div class="animate-pulse space-y-3">
-                    <div class="h-16 bg-slate-100 rounded-xl"></div>
-                    <div class="h-16 bg-slate-100 rounded-xl"></div>
+                <div class="text-center py-8 text-slate-400">
+                    <i class="fa-solid fa-piggy-bank text-4xl mb-2 opacity-40"></i>
+                    <p class="text-xs">Belum ada riwayat tabungan.</p>
                 </div>
             </div>
         </div>
@@ -236,25 +236,7 @@
             </div>
             
             <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
-                <p>Agar aplikasi web ini bisa dibuka selamanya lewat link web sendiri, ikuti 3 langkah mudah berikut:</p>
-                
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                    <strong class="text-slate-800 block">Langkah 1: Salin Kode Ini</strong>
-                    <p>Copy seluruh kode file HTML ini dengan tombol di bawah, lalu simpan di komputer/HP dengan nama file <code class="bg-slate-200 px-1 py-0.5 rounded font-mono font-bold text-slate-700">index.html</code>.</p>
-                    <button onclick="copyFullSourceCode()" class="mt-1 bg-slate-800 hover:bg-slate-900 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
-                        <i class="fa-solid fa-copy"></i> Salin Kode Lengkap
-                    </button>
-                </div>
-
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                    <strong class="text-slate-800 block">Langkah 2: Buat Repository GitHub</strong>
-                    <p>Buka <a href="https://github.com" target="_blank" class="text-blue-600 underline font-medium">github.com</a>, login, buat repository publik baru (misal: <code class="font-mono text-slate-700">tabungan-nikah</code>), lalu upload file <code class="font-mono text-slate-700">index.html</code> tersebut.</p>
-                </div>
-
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
-                    <strong class="text-slate-800 block">Langkah 3: Aktifkan GitHub Pages</strong>
-                    <p>Masuk ke menu <strong>Settings</strong> repository -> pilih <strong>Pages</strong> -> ubah Build and deployment Branch ke <code class="font-mono text-slate-700">main / root</code> -> Save. Selesai! Kamu akan mendapat link web permanen.</p>
-                </div>
+                <p>Aplikasi ini sudah tersambung dan aktif di GitHub Pages.</p>
             </div>
 
             <div class="mt-5 pt-3 border-t border-slate-100 flex justify-end">
@@ -331,94 +313,25 @@
         <span id="toastMsg">Pesan Toast</span>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-            apiKey: "demo-api-key",
-            authDomain: "demo-app.firebaseapp.com",
-            projectId: "demo-app",
-            storageBucket: "demo-app.appspot.com",
-            messagingSenderId: "123456789",
-            appId: "1:123456789:web:123456789"
-        };
-
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tabungan-nikah-default';
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        let currentUser = null;
+    <script>
         let currentRoomId = localStorage.getItem('wedding_room_id') || 'nikah-' + Math.random().toString(36).substring(2, 8);
         localStorage.setItem('wedding_room_id', currentRoomId);
 
-        let savingsData = [];
-        let targetAmount = 50000000;
-        let unsubscribe = null;
+        let savingsData = JSON.parse(localStorage.getItem('wedding_data_' + currentRoomId)) || [];
+        let targetAmount = parseFloat(localStorage.getItem('wedding_target_' + currentRoomId)) || 50000000;
         let currentFilter = 'all';
 
-        window.addEventListener('DOMContentLoaded', async () => {
+        window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('inputDate').valueAsDate = new Date();
             document.getElementById('roomIdInput').value = currentRoomId;
-
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    const userCredential = await signInWithCustomToken(auth, __initial_auth_token);
-                    currentUser = userCredential.user;
-                } else {
-                    const userCredential = await signInAnonymously(auth);
-                    currentUser = userCredential.user;
-                }
-                document.getElementById('syncStatus').innerText = 'Tersambung ke Cloud';
-                document.getElementById('syncStatus').classList.replace('text-rose-100', 'text-emerald-200');
-                
-                listenToSavingsData();
-            } catch (err) {
-                console.error("Auth error:", err);
-                document.getElementById('syncStatus').innerText = 'Mode Offline';
-            }
-
+            renderUI();
             initReminderChecker();
         });
 
-        function listenToSavingsData() {
-            if (!currentUser) return;
-            if (unsubscribe) unsubscribe();
-
-            const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'wedding_rooms', currentRoomId);
-
-            unsubscribe = onSnapshot(roomDocRef, (snapshot) => {
-                if (snapshot.exists()) {
-                    const data = snapshot.data();
-                    savingsData = data.items || [];
-                    targetAmount = data.targetAmount || 50000000;
-                } else {
-                    savingsData = [];
-                    targetAmount = 50000000;
-                    saveToCloud();
-                }
-                renderUI();
-            }, (error) => {
-                console.error("Firestore listen error:", error);
-                showToast("Gagal menyinkronkan data", true);
-            });
-        }
-
-        async function saveToCloud() {
-            if (!currentUser) return;
-            try {
-                const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'wedding_rooms', currentRoomId);
-                await setDoc(roomDocRef, {
-                    items: savingsData,
-                    targetAmount: targetAmount,
-                    updatedAt: new Date().toISOString()
-                });
-            } catch (err) {
-                console.error("Save error:", err);
-                showToast("Gagal menyimpan ke cloud", true);
-            }
+        function saveData() {
+            localStorage.setItem('wedding_data_' + currentRoomId, JSON.stringify(savingsData));
+            localStorage.setItem('wedding_target_' + currentRoomId, targetAmount.toString());
+            renderUI();
         }
 
         window.handleAddSavings = function(e) {
@@ -440,7 +353,7 @@
             };
 
             savingsData.unshift(newItem);
-            saveToCloud();
+            saveData();
 
             document.getElementById('inputAmount').value = '';
             document.getElementById('inputNote').value = '';
@@ -470,7 +383,7 @@
 
         window.deleteTransaction = function(id) {
             savingsData = savingsData.filter(item => item.id !== id);
-            saveToCloud();
+            saveData();
             showToast("Catatan dihapus");
         };
 
@@ -576,9 +489,13 @@
                 currentRoomId = newCode;
                 localStorage.setItem('wedding_room_id', currentRoomId);
                 document.getElementById('roomIdInput').value = currentRoomId;
+                
+                savingsData = JSON.parse(localStorage.getItem('wedding_data_' + currentRoomId)) || [];
+                targetAmount = parseFloat(localStorage.getItem('wedding_target_' + currentRoomId)) || 50000000;
+                
                 closeRoomModal();
-                showToast("Beralih ke ruang tabungan baru!");
-                listenToSavingsData();
+                showToast("Beralih ke ruang tabungan!");
+                renderUI();
             } else {
                 closeRoomModal();
             }
@@ -586,17 +503,6 @@
 
         window.toggleDeployModal = function() {
             document.getElementById('deployModal').classList.toggle('hidden');
-        };
-
-        window.copyFullSourceCode = function() {
-            const htmlContent = document.documentElement.outerHTML;
-            const textarea = document.createElement('textarea');
-            textarea.value = htmlContent;
-            document.body.appendChild(textarea);
-            textarea.select();
-            document.execCommand('copy');
-            document.body.removeChild(textarea);
-            showToast("Kode sumber HTML berhasil disalin!");
         };
 
         window.openTargetModal = function() {
@@ -613,7 +519,7 @@
             const newTarget = parseFloat(document.getElementById('targetInput').value);
             if (newTarget && newTarget > 0) {
                 targetAmount = newTarget;
-                saveToCloud();
+                saveData();
                 closeTargetModal();
                 showToast("Target tabungan diperbarui!");
             }
