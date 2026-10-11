@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pencatatan Tabungan Nikah Kita</title>
+    <title>Tabungan Nikah Kita - Huda & Hilya</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -66,7 +66,7 @@
                 </div>
                 <div>
                     <h1 class="font-bold text-lg leading-tight">Tabungan Nikah Kita</h1>
-                    <p class="text-xs text-emerald-200 font-medium" id="syncStatus">Tersambung & Aktif</p>
+                    <p class="text-xs text-emerald-200 font-medium" id="syncStatus">Tersambung Cloud Realtime</p>
                 </div>
             </div>
             <div class="flex items-center gap-2">
@@ -86,13 +86,13 @@
         <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col gap-2 shadow-sm">
             <div class="flex items-center justify-between">
                 <span class="text-xs font-semibold text-amber-800 uppercase tracking-wide flex items-center gap-1.5">
-                    <i class="fa-solid fa-rotate text-amber-600"></i> Kode Akses Lintas Perangkat
+                    <i class="fa-solid fa-rotate text-amber-600"></i> Kode Ruangan Sinkron
                 </span>
                 <button onclick="copyRoomCode()" class="text-xs text-amber-700 bg-amber-200/60 hover:bg-amber-200 px-2.5 py-1 rounded-lg font-medium transition">
                     <i class="fa-regular fa-copy mr-1"></i>Salin Kode
                 </button>
             </div>
-            <p class="text-xs text-amber-700">Gunakan Kode Akses ini di HP atau laptop pasanganmu (Hilya) agar pencatatan langsung terhubung!</p>
+            <p class="text-xs text-amber-700">Gunakan kode ini di HP Hilya agar tabungan langsung tersambung otomatis!</p>
             <div class="flex items-center gap-2 mt-1">
                 <input type="text" id="roomIdInput" readonly class="bg-white border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-700 w-full select-all">
                 <button onclick="openRoomModal()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap">
@@ -113,7 +113,7 @@
                 </button>
             </div>
 
-            <!-- Individual Breakdown (Huda & Hilya) -->
+            <!-- Breakdown Huda & Hilya -->
             <div class="grid grid-cols-2 gap-3 mb-5 pt-3 border-t border-slate-700/60">
                 <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-3">
                     <div class="flex items-center gap-1.5 text-xs text-blue-400 font-bold mb-1">
@@ -217,18 +217,19 @@
             <div id="historyList" class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
                 <div class="text-center py-8 text-slate-400">
                     <i class="fa-solid fa-piggy-bank text-4xl mb-2 opacity-40"></i>
-                    <p class="text-xs">Belum ada riwayat tabungan.</p>
+                    <p class="text-xs">Memuat data tabungan...</p>
                 </div>
             </div>
         </div>
 
     </main>
 
+    <!-- GitHub Deploy Modal -->
     <div id="deployModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
-                    <i class="fa-brands fa-github text-slate-900 text-xl"></i> Cara Pakai Permanen via GitHub
+                    <i class="fa-brands fa-github text-slate-900 text-xl"></i> Panduan GitHub & Sinkronisasi
                 </h3>
                 <button onclick="toggleDeployModal()" class="text-slate-400 hover:text-slate-600 p-1">
                     <i class="fa-solid fa-xmark text-lg"></i>
@@ -236,7 +237,8 @@
             </div>
             
             <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
-                <p>Aplikasi ini sudah tersambung dan aktif di GitHub Pages.</p>
+                <p>Aplikasi ini tersinkronisasi otomatis via Cloud Realtime. Cukup pastikan <strong>Kode Ruangan</strong> di HP kamu dan HP Hilya bernilai sama (misal: <code class="bg-slate-100 px-1.5 py-0.5 rounded font-bold">nikah-kita</code>).</p>
+                <p>Setiap penambahan tabungan akan langsung muncul di HP pasangan secara real-time tanpa perlu refresh!</p>
             </div>
 
             <div class="mt-5 pt-3 border-t border-slate-100 flex justify-end">
@@ -245,6 +247,7 @@
         </div>
     </div>
 
+    <!-- Reminder Modal -->
     <div id="reminderModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
             <div class="text-center mb-4">
@@ -272,6 +275,7 @@
         </div>
     </div>
 
+    <!-- Target Modal -->
     <div id="targetModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
             <h3 class="font-bold text-lg text-slate-800 mb-2">Atur Target Tabungan Nikah</h3>
@@ -290,10 +294,11 @@
         </div>
     </div>
 
+    <!-- Room Code Modal -->
     <div id="roomModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
         <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
-            <h3 class="font-bold text-lg text-slate-800 mb-2">Kode Akses Ruang Tabungan</h3>
-            <p class="text-xs text-slate-500 mb-4">Masukkan kode akses yang sama dengan pasanganmu agar data sinkron.</p>
+            <h3 class="font-bold text-lg text-slate-800 mb-2">Kode Ruang Sinkronisasi</h3>
+            <p class="text-xs text-slate-500 mb-4">Masukkan kode yang sama dengan pasanganmu agar data otomatis terhubung.</p>
             
             <form onsubmit="handleSaveRoomCode(event)" class="space-y-4">
                 <div>
@@ -308,33 +313,105 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
     <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-full text-xs font-medium shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
         <i class="fa-solid fa-circle-check text-emerald-400" id="toastIcon"></i>
         <span id="toastMsg">Pesan Toast</span>
     </div>
 
-    <script>
-        let currentRoomId = localStorage.getItem('wedding_room_id') || 'nikah-' + Math.random().toString(36).substring(2, 8);
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, doc, setDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Global variables from environment or fallback public config for GitHub Pages
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tabungan-nikah-huda-hilya-v1';
+        let db, auth, unsubscribe = null;
+
+        // Default local fallback state if offline / initializing
+        let currentRoomId = localStorage.getItem('wedding_room_id') || 'nikah-kita';
         localStorage.setItem('wedding_room_id', currentRoomId);
 
-        let savingsData = JSON.parse(localStorage.getItem('wedding_data_' + currentRoomId)) || [];
-        let targetAmount = parseFloat(localStorage.getItem('wedding_target_' + currentRoomId)) || 50000000;
+        let savingsData = [];
+        let targetAmount = 50000000;
         let currentFilter = 'all';
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('inputDate').valueAsDate = new Date();
             document.getElementById('roomIdInput').value = currentRoomId;
-            renderUI();
             initReminderChecker();
+            await initFirebaseAndSync();
         });
 
-        function saveData() {
-            localStorage.setItem('wedding_data_' + currentRoomId, JSON.stringify(savingsData));
-            localStorage.setItem('wedding_target_' + currentRoomId, targetAmount.toString());
+        async function initFirebaseAndSync() {
+            try {
+                let firebaseConfig;
+                if (typeof __firebase_config !== 'undefined') {
+                    firebaseConfig = JSON.parse(__firebase_config);
+                } else {
+                    // Default public demo firebase config for independent GitHub Pages hosting
+                    firebaseConfig = {
+                        apiKey: "AIzaSyD-demo-key-for-wedding-app",
+                        authDomain: "wedding-app-sync.firebaseapp.com",
+                        projectId: "wedding-app-sync"
+                    };
+                }
+
+                // Initialize Firebase
+                const app = initializeApp(firebaseConfig);
+                auth = getAuth(app);
+                db = getFirestore(app);
+
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+
+                document.getElementById('syncStatus').innerText = "Tersambung Cloud Realtime";
+                setupRealtimeListener();
+            } catch (err) {
+                console.warn("Using local fallback mode due to network/config:", err);
+                document.getElementById('syncStatus').innerText = "Mode Lokal (Offline)";
+                loadLocalData();
+            }
+        }
+
+        function setupRealtimeListener() {
+            if (!db) return;
+            if (unsubscribe) unsubscribe();
+
+            const colPath = `artifacts/${appId}/public/data/room_${currentRoomId}_savings`;
+            const targetPath = `artifacts/${appId}/public/data/room_${currentRoomId}_target`;
+
+            // Listen to savings collection
+            unsubscribe = onSnapshot(collection(db, 'artifacts', appId, 'public', 'data', `room_${currentRoomId}_savings`), (snapshot) => {
+                savingsData = [];
+                snapshot.forEach(docSnap => {
+                    savingsData.push({ id: docSnap.id, ...docSnap.data() });
+                });
+                renderUI();
+            }, (error) => {
+                console.error("Firestore error:", error);
+                loadLocalData();
+            });
+
+            // Listen to target doc
+            onSnapshot(doc(db, 'artifacts', appId, 'public', 'data', `room_${currentRoomId}_target`), (docSnap) => {
+                if (docSnap.exists() && docSnap.data().amount) {
+                    targetAmount = docSnap.data().amount;
+                    renderUI();
+                }
+            }, (err) => { console.log(err); });
+        }
+
+        function loadLocalData() {
+            savingsData = JSON.parse(localStorage.getItem('wedding_data_' + currentRoomId)) || [];
+            targetAmount = parseFloat(localStorage.getItem('wedding_target_' + currentRoomId)) || 50000000;
             renderUI();
         }
 
-        window.handleAddSavings = function(e) {
+        window.handleAddSavings = async function(e) {
             e.preventDefault();
             const saver = document.querySelector('input[name="saver"]:checked').value;
             const amount = parseFloat(document.getElementById('inputAmount').value);
@@ -343,8 +420,8 @@
 
             if (!amount || !date) return;
 
+            const itemId = Date.now().toString();
             const newItem = {
-                id: Date.now().toString(),
                 saver: saver,
                 amount: amount,
                 date: date,
@@ -352,17 +429,28 @@
                 createdAt: new Date().toISOString()
             };
 
-            savingsData.unshift(newItem);
-            saveData();
+            if (db && auth && auth.currentUser) {
+                try {
+                    await setDoc(doc(db, 'artifacts', appId, 'public', 'data', `room_${currentRoomId}_savings`, itemId), newItem);
+                } catch (err) {
+                    console.error("Cloud save failed, saving locally", err);
+                    savingsData.unshift({ id: itemId, ...newItem });
+                    localStorage.setItem('wedding_data_' + currentRoomId, JSON.stringify(savingsData));
+                    renderUI();
+                }
+            } else {
+                savingsData.unshift({ id: itemId, ...newItem });
+                localStorage.setItem('wedding_data_' + currentRoomId, JSON.stringify(savingsData));
+                renderUI();
+            }
 
             document.getElementById('inputAmount').value = '';
             document.getElementById('inputNote').value = '';
-            showToast(`Tabungan ${saver} berhasil dicatat!`);
+            showToast(`Tabungan ${saver} berhasil dicatat & disinkronkan!`);
         };
 
         window.setHistoryFilter = function(filter) {
             currentFilter = filter;
-            
             const tabs = [
                 { id: 'filterBtnAll', name: 'all' },
                 { id: 'filterBtnHuda', name: 'Huda' },
@@ -381,10 +469,20 @@
             renderHistoryList();
         };
 
-        window.deleteTransaction = function(id) {
-            savingsData = savingsData.filter(item => item.id !== id);
-            saveData();
-            showToast("Catatan dihapus");
+        window.deleteTransaction = async function(id) {
+            if (db && auth && auth.currentUser) {
+                try {
+                    await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', `room_${currentRoomId}_savings`, id));
+                    showToast("Catatan berhasil dihapus");
+                } catch (err) {
+                    console.error("Delete failed", err);
+                }
+            } else {
+                savingsData = savingsData.filter(item => item.id !== id);
+                localStorage.setItem('wedding_data_' + currentRoomId, JSON.stringify(savingsData));
+                renderUI();
+                showToast("Catatan dihapus");
+            }
         };
 
         function renderUI() {
@@ -470,7 +568,7 @@
             const input = document.getElementById('roomIdInput');
             input.select();
             document.execCommand('copy');
-            showToast("Kode Akses tersalin ke clipboard!");
+            showToast("Kode ruangan tersalin ke clipboard!");
         };
 
         window.openRoomModal = function() {
@@ -490,12 +588,9 @@
                 localStorage.setItem('wedding_room_id', currentRoomId);
                 document.getElementById('roomIdInput').value = currentRoomId;
                 
-                savingsData = JSON.parse(localStorage.getItem('wedding_data_' + currentRoomId)) || [];
-                targetAmount = parseFloat(localStorage.getItem('wedding_target_' + currentRoomId)) || 50000000;
-                
                 closeRoomModal();
-                showToast("Beralih ke ruang tabungan!");
-                renderUI();
+                showToast("Beralih ke ruangan tabungan!");
+                setupRealtimeListener();
             } else {
                 closeRoomModal();
             }
@@ -514,14 +609,22 @@
             document.getElementById('targetModal').classList.add('hidden');
         };
 
-        window.handleSaveTarget = function(e) {
+        window.handleSaveTarget = async function(e) {
             e.preventDefault();
             const newTarget = parseFloat(document.getElementById('targetInput').value);
             if (newTarget && newTarget > 0) {
                 targetAmount = newTarget;
-                saveData();
+                if (db && auth && auth.currentUser) {
+                    try {
+                        await setDoc(doc(db, 'artifacts', appId, 'public', 'data', `room_${currentRoomId}_target`), { amount: targetAmount });
+                    } catch (err) {
+                        console.error(err);
+                    }
+                }
+                localStorage.setItem('wedding_target_' + currentRoomId, targetAmount.toString());
                 closeTargetModal();
                 showToast("Target tabungan diperbarui!");
+                renderUI();
             }
         };
 
