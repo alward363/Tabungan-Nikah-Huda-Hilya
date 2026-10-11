@@ -1,0 +1,718 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pencatatan Tabungan Nikah Kita</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                    },
+                    colors: {
+                        rose: {
+                            50: '#fff1f2',
+                            100: '#ffe4e6',
+                            500: '#f43f5e',
+                            600: '#e11d48',
+                            700: '#be123c',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 8px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen pb-12">
+
+    <header class="bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg sticky top-0 z-30">
+        <div class="max-w-xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center backdrop-blur-md">
+                    <i class="fa-solid font-bold fa-heart text-white text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="font-bold text-lg leading-tight">Tabungan Nikah Kita</h1>
+                    <p class="text-xs text-rose-100" id="syncStatus">Memuat data cloud...</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleDeployModal()" class="p-2 rounded-full bg-white/20 hover:bg-white/30 transition text-white" title="Panduan GitHub / Hosting Permanen">
+                    <i class="fa-brands fa-github text-lg"></i>
+                </button>
+                <button id="reminderBtn" onclick="toggleReminderModal()" class="p-2 rounded-full bg-white/20 hover:bg-white/30 transition text-white relative" title="Pengingat Jam 7 Malam">
+                    <i class="fa-regular fa-bell text-lg"></i>
+                    <span id="bellBadge" class="hidden absolute top-1 right-1 w-2.5 h-2.5 bg-yellow-400 rounded-full"></span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-xl mx-auto px-4 mt-6 space-y-6">
+
+        <div class="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col gap-2 shadow-sm">
+            <div class="flex items-center justify-between">
+                <span class="text-xs font-semibold text-amber-800 uppercase tracking-wide flex items-center gap-1.5">
+                    <i class="fa-solid fa-rotate text-amber-600"></i> Kode Akses Lintas Perangkat
+                </span>
+                <button onclick="copyRoomCode()" class="text-xs text-amber-700 bg-amber-200/60 hover:bg-amber-200 px-2.5 py-1 rounded-lg font-medium transition">
+                    <i class="fa-regular fa-copy mr-1"></i>Salin Kode
+                </button>
+            </div>
+            <p class="text-xs text-amber-700">Gunakan Kode Akses ini di HP atau laptop pasanganmu (Hilya) agar pencatatan langsung terhubung!</p>
+            <div class="flex items-center gap-2 mt-1">
+                <input type="text" id="roomIdInput" readonly class="bg-white border border-amber-300 rounded-lg px-3 py-1.5 text-xs font-mono font-bold text-slate-700 w-full select-all">
+                <button onclick="openRoomModal()" class="text-xs bg-amber-600 hover:bg-amber-700 text-white px-3 py-1.5 rounded-lg font-medium transition whitespace-nowrap">
+                    Ganti / Masuk Kode
+                </button>
+            </div>
+        </div>
+
+        <div class="bg-gradient-to-br from-slate-900 to-slate-800 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+            <div class="absolute -right-6 -bottom-6 w-32 h-32 bg-rose-500/10 rounded-full blur-2xl"></div>
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <p class="text-xs font-medium text-slate-400 uppercase tracking-wider">Total Gabungan Terkumpul</p>
+                    <h2 class="text-3xl font-extrabold text-white mt-1" id="totalSavedDisplay">Rp 0</h2>
+                </div>
+                <button onclick="openTargetModal()" class="p-2 bg-slate-700/60 hover:bg-slate-700 text-slate-300 rounded-xl text-xs transition border border-slate-600 flex items-center gap-1.5">
+                    <i class="fa-solid fa-pen-to-square"></i> Atur Target
+                </button>
+            </div>
+
+            <!-- Individual Breakdown (Huda & Hilya) -->
+            <div class="grid grid-cols-2 gap-3 mb-5 pt-3 border-t border-slate-700/60">
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-3">
+                    <div class="flex items-center gap-1.5 text-xs text-blue-400 font-bold mb-1">
+                        <i class="fa-solid fa-user-tie"></i> Tabungan Huda
+                    </div>
+                    <p class="text-lg font-bold text-white" id="totalHudaDisplay">Rp 0</p>
+                    <p class="text-[10px] text-slate-400" id="percentHudaDisplay">0% dari target</p>
+                </div>
+                <div class="bg-slate-800/80 border border-slate-700/80 rounded-2xl p-3">
+                    <div class="flex items-center gap-1.5 text-xs text-pink-400 font-bold mb-1">
+                        <i class="fa-solid fa-user-dress"></i> Tabungan Hilya
+                    </div>
+                    <p class="text-lg font-bold text-white" id="totalHilyaDisplay">Rp 0</p>
+                    <p class="text-[10px] text-slate-400" id="percentHilyaDisplay">0% dari target</p>
+                </div>
+            </div>
+
+            <!-- Target Progress Bar -->
+            <div class="space-y-2 mt-2">
+                <div class="flex justify-between text-xs font-medium">
+                    <span class="text-slate-400">Target: <strong id="targetAmountDisplay" class="text-white">Rp 50.000.000</strong></span>
+                    <span id="targetPercent" class="text-rose-400 font-bold">0%</span>
+                </div>
+                <div class="w-full bg-slate-700/70 h-3 rounded-full overflow-hidden p-0.5 border border-slate-600">
+                    <div id="progressBar" class="bg-gradient-to-r from-rose-500 to-pink-500 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+                </div>
+                <p class="text-[11px] text-slate-400 text-right mt-1" id="remainingTargetDisplay">Sisa target: Rp 50.000.000</p>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <h3 class="font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-circle-plus text-rose-500"></i> Tambah Tabungan Baru
+            </h3>
+            <form id="savingsForm" onsubmit="handleAddSavings(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1.5">Penabung / Pemilik Tabungan</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <label class="cursor-pointer">
+                            <input type="radio" name="saver" value="Huda" class="peer hidden" checked>
+                            <div class="p-2.5 rounded-xl border border-slate-200 text-center font-semibold text-xs text-slate-600 peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:text-blue-600 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-user-tie"></i> Huda
+                            </div>
+                        </label>
+                        <label class="cursor-pointer">
+                            <input type="radio" name="saver" value="Hilya" class="peer hidden">
+                            <div class="p-2.5 rounded-xl border border-slate-200 text-center font-semibold text-xs text-slate-600 peer-checked:border-pink-500 peer-checked:bg-pink-50 peer-checked:text-pink-600 transition flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-user-dress"></i> Hilya
+                            </div>
+                        </label>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Nominal (Rp)</label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-1/2 -translate-y-1/2 font-bold text-slate-400 text-sm">Rp</span>
+                        <input type="number" id="inputAmount" required min="1" placeholder="Contoh: 100000" class="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 text-sm font-semibold text-slate-800 transition">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Tanggal</label>
+                        <input type="date" id="inputDate" required class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 text-sm text-slate-800 transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">Catatan (Opsional)</label>
+                        <input type="text" id="inputNote" placeholder="Sisa gaji, bonus, dll" class="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500/50 focus:border-rose-500 text-sm text-slate-800 transition">
+                    </div>
+                </div>
+
+                <button type="submit" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-bold py-3 rounded-xl shadow-md hover:shadow-rose-500/20 active:scale-[0.99] transition flex items-center justify-center gap-2 text-sm">
+                    <i class="fa-solid fa-paper-plane"></i> Simpan Tabungan
+                </button>
+            </form>
+        </div>
+
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-slate-100">
+            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mb-4">
+                <h3 class="font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-clock-rotate-left text-rose-500"></i> Riwayat Tabungan
+                </h3>
+                <span id="historyCount" class="text-xs font-medium text-slate-400 bg-slate-100 px-2.5 py-1 rounded-full">0 transaksi</span>
+            </div>
+
+            <!-- Tab Filter -->
+            <div class="flex p-1 bg-slate-100 rounded-xl mb-4 gap-1">
+                <button onclick="setHistoryFilter('all')" id="filterBtnAll" class="flex-1 py-1.5 text-xs font-semibold rounded-lg bg-white text-slate-800 shadow-sm transition">
+                    Semua
+                </button>
+                <button onclick="setHistoryFilter('Huda')" id="filterBtnHuda" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition">
+                    <i class="fa-solid fa-user-tie mr-1 text-blue-500"></i>Huda
+                </button>
+                <button onclick="setHistoryFilter('Hilya')" id="filterBtnHilya" class="flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition">
+                    <i class="fa-solid fa-user-dress mr-1 text-pink-500"></i>Hilya
+                </button>
+            </div>
+
+            <!-- History Container -->
+            <div id="historyList" class="space-y-3 max-h-[380px] overflow-y-auto pr-1">
+                <div class="animate-pulse space-y-3">
+                    <div class="h-16 bg-slate-100 rounded-xl"></div>
+                    <div class="h-16 bg-slate-100 rounded-xl"></div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <div id="deployModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100 max-h-[90vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-lg text-slate-800 flex items-center gap-2">
+                    <i class="fa-brands fa-github text-slate-900 text-xl"></i> Cara Pakai Permanen via GitHub
+                </h3>
+                <button onclick="toggleDeployModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-3 text-xs text-slate-600 leading-relaxed">
+                <p>Agar aplikasi web ini bisa dibuka selamanya lewat link web sendiri, ikuti 3 langkah mudah berikut:</p>
+                
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                    <strong class="text-slate-800 block">Langkah 1: Salin Kode Ini</strong>
+                    <p>Copy seluruh kode file HTML ini dengan tombol di bawah, lalu simpan di komputer/HP dengan nama file <code class="bg-slate-200 px-1 py-0.5 rounded font-mono font-bold text-slate-700">index.html</code>.</p>
+                    <button onclick="copyFullSourceCode()" class="mt-1 bg-slate-800 hover:bg-slate-900 text-white font-semibold px-3 py-1.5 rounded-lg text-xs transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-copy"></i> Salin Kode Lengkap
+                    </button>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                    <strong class="text-slate-800 block">Langkah 2: Buat Repository GitHub</strong>
+                    <p>Buka <a href="https://github.com" target="_blank" class="text-blue-600 underline font-medium">github.com</a>, login, buat repository publik baru (misal: <code class="font-mono text-slate-700">tabungan-nikah</code>), lalu upload file <code class="font-mono text-slate-700">index.html</code> tersebut.</p>
+                </div>
+
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1">
+                    <strong class="text-slate-800 block">Langkah 3: Aktifkan GitHub Pages</strong>
+                    <p>Masuk ke menu <strong>Settings</strong> repository -> pilih <strong>Pages</strong> -> ubah Build and deployment Branch ke <code class="font-mono text-slate-700">main / root</code> -> Save. Selesai! Kamu akan mendapat link web permanen.</p>
+                </div>
+            </div>
+
+            <div class="mt-5 pt-3 border-t border-slate-100 flex justify-end">
+                <button onclick="toggleDeployModal()" class="bg-rose-500 hover:bg-rose-600 text-white font-semibold px-4 py-2 rounded-xl text-xs transition">Mengerti</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="reminderModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
+            <div class="text-center mb-4">
+                <div class="w-12 h-12 bg-rose-100 rounded-full flex items-center justify-center mx-auto mb-3 text-rose-500 text-xl">
+                    <i class="fa-solid fa-bell font-bold"></i>
+                </div>
+                <h3 class="font-bold text-lg text-slate-800">Pengingat Harian (07:00 Malam)</h3>
+                <p class="text-xs text-slate-500 mt-1">
+                    Aktifkan notifikasi untuk pengingat otomatis jam 7 malam: 
+                    <span class="font-semibold text-rose-600 block mt-1">"Apakah sudah nabung buat nikah hari ini?"</span>
+                </p>
+            </div>
+
+            <div class="space-y-3">
+                <button onclick="enableBrowserNotifications()" class="w-full bg-rose-500 hover:bg-rose-600 text-white font-semibold py-2.5 rounded-xl text-sm transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-check"></i> Aktifkan Notifikasi Sistem
+                </button>
+                <button onclick="testNotification()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-semibold py-2.5 rounded-xl text-sm transition">
+                    <i class="fa-solid fa-vial mr-1"></i> Tes Munculkan Notifikasi
+                </button>
+                <button onclick="toggleReminderModal()" class="w-full border border-slate-200 text-slate-500 hover:bg-slate-50 font-medium py-2 rounded-xl text-sm transition">
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="targetModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
+            <h3 class="font-bold text-lg text-slate-800 mb-2">Atur Target Tabungan Nikah</h3>
+            <p class="text-xs text-slate-500 mb-4">Masukkan total estimasi biaya pernikahan.</p>
+            
+            <form onsubmit="handleSaveTarget(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Target Nominal (Rp)</label>
+                    <input type="number" id="targetInput" required min="100000" class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-rose-500 text-sm font-semibold">
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeTargetModal()" class="w-1/2 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold">Batal</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-rose-500 hover:bg-rose-600 text-white rounded-xl text-sm font-semibold">Simpan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="roomModal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+        <div class="bg-white rounded-2xl max-w-sm w-full p-6 shadow-2xl border border-slate-100">
+            <h3 class="font-bold text-lg text-slate-800 mb-2">Kode Akses Ruang Tabungan</h3>
+            <p class="text-xs text-slate-500 mb-4">Masukkan kode akses yang sama dengan pasanganmu agar data sinkron.</p>
+            
+            <form onsubmit="handleSaveRoomCode(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-slate-600 mb-1">Kode Ruangan</label>
+                    <input type="text" id="roomCodeInputModal" required class="w-full px-3 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 text-sm font-mono font-bold">
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeRoomModal()" class="w-1/2 py-2.5 border border-slate-200 text-slate-600 rounded-xl text-sm font-semibold">Batal</button>
+                    <button type="submit" class="w-1/2 py-2.5 bg-amber-600 hover:bg-amber-700 text-white rounded-xl text-sm font-semibold">Masuk Ruangan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="toast" class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-4 py-2.5 rounded-full text-xs font-medium shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+        <i class="fa-solid fa-circle-check text-emerald-400" id="toastIcon"></i>
+        <span id="toastMsg">Pesan Toast</span>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+            apiKey: "demo-api-key",
+            authDomain: "demo-app.firebaseapp.com",
+            projectId: "demo-app",
+            storageBucket: "demo-app.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:123456789"
+        };
+
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'tabungan-nikah-default';
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        let currentUser = null;
+        let currentRoomId = localStorage.getItem('wedding_room_id') || 'nikah-' + Math.random().toString(36).substring(2, 8);
+        localStorage.setItem('wedding_room_id', currentRoomId);
+
+        let savingsData = [];
+        let targetAmount = 50000000;
+        let unsubscribe = null;
+        let currentFilter = 'all';
+
+        window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('inputDate').valueAsDate = new Date();
+            document.getElementById('roomIdInput').value = currentRoomId;
+
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    const userCredential = await signInWithCustomToken(auth, __initial_auth_token);
+                    currentUser = userCredential.user;
+                } else {
+                    const userCredential = await signInAnonymously(auth);
+                    currentUser = userCredential.user;
+                }
+                document.getElementById('syncStatus').innerText = 'Tersambung ke Cloud';
+                document.getElementById('syncStatus').classList.replace('text-rose-100', 'text-emerald-200');
+                
+                listenToSavingsData();
+            } catch (err) {
+                console.error("Auth error:", err);
+                document.getElementById('syncStatus').innerText = 'Mode Offline';
+            }
+
+            initReminderChecker();
+        });
+
+        function listenToSavingsData() {
+            if (!currentUser) return;
+            if (unsubscribe) unsubscribe();
+
+            const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'wedding_rooms', currentRoomId);
+
+            unsubscribe = onSnapshot(roomDocRef, (snapshot) => {
+                if (snapshot.exists()) {
+                    const data = snapshot.data();
+                    savingsData = data.items || [];
+                    targetAmount = data.targetAmount || 50000000;
+                } else {
+                    savingsData = [];
+                    targetAmount = 50000000;
+                    saveToCloud();
+                }
+                renderUI();
+            }, (error) => {
+                console.error("Firestore listen error:", error);
+                showToast("Gagal menyinkronkan data", true);
+            });
+        }
+
+        async function saveToCloud() {
+            if (!currentUser) return;
+            try {
+                const roomDocRef = doc(db, 'artifacts', appId, 'public', 'data', 'wedding_rooms', currentRoomId);
+                await setDoc(roomDocRef, {
+                    items: savingsData,
+                    targetAmount: targetAmount,
+                    updatedAt: new Date().toISOString()
+                });
+            } catch (err) {
+                console.error("Save error:", err);
+                showToast("Gagal menyimpan ke cloud", true);
+            }
+        }
+
+        window.handleAddSavings = function(e) {
+            e.preventDefault();
+            const saver = document.querySelector('input[name="saver"]:checked').value;
+            const amount = parseFloat(document.getElementById('inputAmount').value);
+            const date = document.getElementById('inputDate').value;
+            const note = document.getElementById('inputNote').value.trim();
+
+            if (!amount || !date) return;
+
+            const newItem = {
+                id: Date.now().toString(),
+                saver: saver,
+                amount: amount,
+                date: date,
+                note: note || 'Tabungan Nikah',
+                createdAt: new Date().toISOString()
+            };
+
+            savingsData.unshift(newItem);
+            saveToCloud();
+
+            document.getElementById('inputAmount').value = '';
+            document.getElementById('inputNote').value = '';
+            showToast(`Tabungan ${saver} berhasil dicatat!`);
+        };
+
+        window.setHistoryFilter = function(filter) {
+            currentFilter = filter;
+            
+            const tabs = [
+                { id: 'filterBtnAll', name: 'all' },
+                { id: 'filterBtnHuda', name: 'Huda' },
+                { id: 'filterBtnHilya', name: 'Hilya' }
+            ];
+
+            tabs.forEach(tab => {
+                const btn = document.getElementById(tab.id);
+                if (tab.name === filter) {
+                    btn.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg bg-white text-slate-800 shadow-sm transition";
+                } else {
+                    btn.className = "flex-1 py-1.5 text-xs font-semibold rounded-lg text-slate-500 hover:text-slate-800 transition";
+                }
+            });
+
+            renderHistoryList();
+        };
+
+        window.deleteTransaction = function(id) {
+            savingsData = savingsData.filter(item => item.id !== id);
+            saveToCloud();
+            showToast("Catatan dihapus");
+        };
+
+        function renderUI() {
+            savingsData.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const totalHuda = savingsData.filter(i => (i.saver || 'Huda') === 'Huda').reduce((acc, curr) => acc + curr.amount, 0);
+            const totalHilya = savingsData.filter(i => i.saver === 'Hilya').reduce((acc, curr) => acc + curr.amount, 0);
+            const totalSaved = totalHuda + totalHilya;
+
+            const percentage = Math.min(100, Math.round((totalSaved / targetAmount) * 100));
+            const remaining = Math.max(0, targetAmount - totalSaved);
+
+            const percentHuda = targetAmount ? Math.round((totalHuda / targetAmount) * 100) : 0;
+            const percentHilya = targetAmount ? Math.round((totalHilya / targetAmount) * 100) : 0;
+
+            document.getElementById('totalSavedDisplay').innerText = formatRupiah(totalSaved);
+            document.getElementById('totalHudaDisplay').innerText = formatRupiah(totalHuda);
+            document.getElementById('totalHilyaDisplay').innerText = formatRupiah(totalHilya);
+            
+            document.getElementById('percentHudaDisplay').innerText = `${percentHuda}% dari target`;
+            document.getElementById('percentHilyaDisplay').innerText = `${percentHilya}% dari target`;
+
+            document.getElementById('targetAmountDisplay').innerText = formatRupiah(targetAmount);
+            document.getElementById('targetPercent').innerText = percentage + '%';
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('remainingTargetDisplay').innerText = `Sisa target: ${formatRupiah(remaining)}`;
+
+            renderHistoryList();
+        }
+
+        function renderHistoryList() {
+            const historyContainer = document.getElementById('historyList');
+
+            const filteredData = savingsData.filter(item => {
+                if (currentFilter === 'all') return true;
+                const saver = item.saver || 'Huda';
+                return saver === currentFilter;
+            });
+
+            document.getElementById('historyCount').innerText = `${filteredData.length} transaksi`;
+
+            if (filteredData.length === 0) {
+                historyContainer.innerHTML = `
+                    <div class="text-center py-8 text-slate-400">
+                        <i class="fa-solid fa-piggy-bank text-4xl mb-2 opacity-40"></i>
+                        <p class="text-xs">Belum ada riwayat tabungan${currentFilter !== 'all' ? ' untuk ' + currentFilter : ''}.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            historyContainer.innerHTML = filteredData.map(item => {
+                const saverName = item.saver || 'Huda';
+                const isHuda = saverName === 'Huda';
+                const badgeColor = isHuda ? 'bg-blue-100 text-blue-600' : 'bg-pink-100 text-pink-600';
+                const iconClass = isHuda ? 'fa-user-tie' : 'fa-user-dress';
+
+                return `
+                <div class="flex items-center justify-between p-3.5 rounded-xl border border-slate-100 hover:border-rose-100 bg-slate-50/50 hover:bg-rose-50/30 transition group">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-xl ${badgeColor} flex items-center justify-center font-bold text-sm shrink-0" title="${saverName}">
+                            <i class="fa-solid ${iconClass}"></i>
+                        </div>
+                        <div>
+                            <div class="flex items-center gap-2">
+                                <p class="font-bold text-slate-800 text-sm">${formatRupiah(item.amount)}</p>
+                                <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${badgeColor}">${saverName}</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500 flex items-center gap-2 mt-0.5">
+                                <span><i class="fa-regular fa-calendar mr-1"></i>${formatDate(item.date)}</span>
+                                ${item.note ? `<span>• ${escapeHtml(item.note)}</span>` : ''}
+                            </p>
+                        </div>
+                    </div>
+                    <button onclick="deleteTransaction('${item.id}')" class="text-slate-300 hover:text-rose-500 p-2 transition opacity-80 group-hover:opacity-100" title="Hapus">
+                        <i class="fa-solid fa-trash-can text-sm"></i>
+                    </button>
+                </div>
+            `}).join('');
+        }
+
+        window.copyRoomCode = function() {
+            const input = document.getElementById('roomIdInput');
+            input.select();
+            document.execCommand('copy');
+            showToast("Kode Akses tersalin ke clipboard!");
+        };
+
+        window.openRoomModal = function() {
+            document.getElementById('roomCodeInputModal').value = currentRoomId;
+            document.getElementById('roomModal').classList.remove('hidden');
+        };
+
+        window.closeRoomModal = function() {
+            document.getElementById('roomModal').classList.add('hidden');
+        };
+
+        window.handleSaveRoomCode = function(e) {
+            e.preventDefault();
+            const newCode = document.getElementById('roomCodeInputModal').value.trim().toLowerCase();
+            if (newCode && newCode !== currentRoomId) {
+                currentRoomId = newCode;
+                localStorage.setItem('wedding_room_id', currentRoomId);
+                document.getElementById('roomIdInput').value = currentRoomId;
+                closeRoomModal();
+                showToast("Beralih ke ruang tabungan baru!");
+                listenToSavingsData();
+            } else {
+                closeRoomModal();
+            }
+        };
+
+        window.toggleDeployModal = function() {
+            document.getElementById('deployModal').classList.toggle('hidden');
+        };
+
+        window.copyFullSourceCode = function() {
+            const htmlContent = document.documentElement.outerHTML;
+            const textarea = document.createElement('textarea');
+            textarea.value = htmlContent;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            showToast("Kode sumber HTML berhasil disalin!");
+        };
+
+        window.openTargetModal = function() {
+            document.getElementById('targetInput').value = targetAmount;
+            document.getElementById('targetModal').classList.remove('hidden');
+        };
+
+        window.closeTargetModal = function() {
+            document.getElementById('targetModal').classList.add('hidden');
+        };
+
+        window.handleSaveTarget = function(e) {
+            e.preventDefault();
+            const newTarget = parseFloat(document.getElementById('targetInput').value);
+            if (newTarget && newTarget > 0) {
+                targetAmount = newTarget;
+                saveToCloud();
+                closeTargetModal();
+                showToast("Target tabungan diperbarui!");
+            }
+        };
+
+        window.toggleReminderModal = function() {
+            document.getElementById('reminderModal').classList.toggle('hidden');
+        };
+
+        window.enableBrowserNotifications = function() {
+            if (!("Notification" in window)) {
+                showToast("Browser Anda tidak mendukung notifikasi web.", true);
+                return;
+            }
+
+            Notification.requestPermission().then((permission) => {
+                if (permission === "granted") {
+                    showToast("Notifikasi pengingat diaktifkan!");
+                    document.getElementById('bellBadge').classList.remove('hidden');
+                    toggleReminderModal();
+                    triggerNotification("Pengingat Tabungan Nikah", "Apakah sudah nabung buat nikah hari ini?");
+                } else {
+                    showToast("Izin notifikasi ditolak oleh browser", true);
+                }
+            });
+        };
+
+        window.testNotification = function() {
+            if (Notification.permission === "granted") {
+                triggerNotification("Pengingat Tabungan Nikah", "Apakah sudah nabung buat nikah hari ini?");
+            } else {
+                enableBrowserNotifications();
+            }
+        };
+
+        function triggerNotification(title, body) {
+            if (Notification.permission === "granted") {
+                new Notification(title, {
+                    body: body,
+                    icon: "https://cdn-icons-png.flaticon.com/512/2904/2904843.png"
+                });
+            }
+        }
+
+        function initReminderChecker() {
+            if ("Notification" in window && Notification.permission === "granted") {
+                document.getElementById('bellBadge').classList.remove('hidden');
+            }
+
+            setInterval(() => {
+                const now = new Date();
+                const hours = now.getHours();
+                const minutes = now.getMinutes();
+                const lastNotifiedDate = localStorage.getItem('last_notified_date');
+                const todayStr = now.toDateString();
+
+                if (hours === 19 && minutes === 0 && lastNotifiedDate !== todayStr) {
+                    if (Notification.permission === "granted") {
+                        triggerNotification("Pengingat Tabungan Nikah ❤️", "Apakah sudah nabung buat nikah hari ini?");
+                        localStorage.setItem('last_notified_date', todayStr);
+                    }
+                }
+            }, 30000);
+        }
+
+        function formatRupiah(val) {
+            return new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(val);
+        }
+
+        function formatDate(dateStr) {
+            const options = { day: 'numeric', month: 'short', year: 'numeric' };
+            return new Date(dateStr).toLocaleDateString('id-ID', options);
+        }
+
+        function escapeHtml(text) {
+            return text.replace(/[&<>"']/g, function(m) {
+                return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' }[m];
+            });
+        }
+
+        function showToast(msg, isError = false) {
+            const toast = document.getElementById('toast');
+            const toastMsg = document.getElementById('toastMsg');
+            const toastIcon = document.getElementById('toastIcon');
+
+            toastMsg.innerText = msg;
+            if (isError) {
+                toastIcon.className = "fa-solid fa-circle-exclamation text-rose-400";
+            } else {
+                toastIcon.className = "fa-solid fa-circle-check text-emerald-400";
+            }
+
+            toast.classList.remove('opacity-0', 'pointer-events-none');
+            setTimeout(() => {
+                toast.classList.add('opacity-0', 'pointer-events-none');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
+```
